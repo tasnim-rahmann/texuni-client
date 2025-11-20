@@ -1,11 +1,7 @@
+import MainLayout from "./components/layout/MainLayout";
+
 function App() {
-  return (
-    <>
-      <h1 className="text-lg font-medium uppercase">
-        Ph University management app
-      </h1>
-    </>
-  );
+  return <MainLayout />;
 }
 
 export default App;
