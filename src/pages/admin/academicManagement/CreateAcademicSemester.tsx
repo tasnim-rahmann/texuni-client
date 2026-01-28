@@ -1,12 +1,39 @@
 import type { FieldValues, SubmitHandler } from "react-hook-form";
 import PHForm from "../../../components/form/PHForm";
-import PHInput from "../../../components/form/PHInput";
 import { Button, Col, Flex } from "antd";
 import PHSelect from "../../../components/form/PHSelect";
+import { semesterOptions } from "../../../constants/semester";
+import { monthOptions } from "../../../constants/global";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { academicSemesterSchema } from "../../../schemas/academicManagement.schema";
+import { useAddAcademicSemesterMutation } from "../../../redux/features/admin/academicManagement.api";
+import { toast } from "sonner";
+
+const currentYear = new Date().getFullYear();
+const yearOptions = [0, 1, 2, 3, 4].map((number) => ({
+  value: String(currentYear + number),
+  label: String(currentYear + number),
+}));
 
 const CreateAcademicSemester = () => {
-  const onSubmit: SubmitHandler<FieldValues> = (data) => {
-    console.log(data);
+  const [addAcademicSemester] = useAddAcademicSemesterMutation();
+
+  const onSubmit: SubmitHandler<FieldValues> = async (data) => {
+    const name = semesterOptions[Number(data?.name) - 1]?.label;
+    const semesterData = {
+      name,
+      code: data.name,
+      year: data.year,
+      startMonth: data.startMonth,
+      endMonth: data.endMonth,
+    };
+
+    try {
+      const res = await addAcademicSemester(semesterData);
+      console.log(res);
+    } catch (error) {
+      toast.error("Something went wrong!");
+    }
   };
 
   return (
@@ -20,13 +47,29 @@ const CreateAcademicSemester = () => {
           background: "#fff",
         }}
       >
-        <PHForm onSubmit={onSubmit}>
+        <PHForm
+          onSubmit={onSubmit}
+          resolver={zodResolver(academicSemesterSchema)}
+        >
           <div style={{ marginBottom: "12px" }}>
-            <PHSelect label="Name" />
+            <PHSelect label="Name" name="name" options={semesterOptions} />
           </div>
-
           <div style={{ marginBottom: "12px" }}>
-            <PHInput type="text" name="year" label="Year" placeholder="2025" />
+            <PHSelect label="Year" name="year" options={yearOptions} />
+          </div>
+          <div style={{ marginBottom: "12px" }}>
+            <PHSelect
+              label="Start Month"
+              name="startMonth"
+              options={monthOptions}
+            />
+          </div>
+          <div style={{ marginBottom: "12px" }}>
+            <PHSelect
+              label="End Month"
+              name="endMonth"
+              options={monthOptions}
+            />
           </div>
 
           <Button type="primary" htmlType="submit" block>
